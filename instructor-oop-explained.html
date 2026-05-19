@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instructor Module — OOP, Relationships & CRUD Explained</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --card: #161b24;
+    --border: #1f2535;
+    --accent: #4f9eff;
+    --accent2: #a78bfa;
+    --accent3: #34d399;
+    --accent4: #f59e0b;
+    --accent5: #fb7185;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --code-bg: #0d1117;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    padding: 80px 40px 60px;
+    text-align: center;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(79,158,255,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(167,139,250,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(79,158,255,0.1);
+    border: 1px solid rgba(79,158,255,0.25);
+    border-radius: 4px;
+    padding: 4px 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* NAV PILLS */
+  .nav-strip {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-strip a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-decoration: none;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .nav-strip a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+
+  /* SECTIONS */
+  section {
+    padding: 64px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  section h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .intro-text {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 36px;
+    max-width: 720px;
+  }
+
+  /* CARDS GRID */
+  .cards {
+    display: grid;
+    gap: 16px;
+  }
+  .cards.cols-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .cards.cols-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .cards.cols-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover { transform: translateY(-2px); }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--card-accent, var(--accent));
+    opacity: 0.7;
+  }
+
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 14px;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .card h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+
+  .card p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+
+  /* CODE BLOCKS */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    margin: 16px 0;
+  }
+
+  .kw { color: #ff79c6; }
+  .cls { color: #8be9fd; }
+  .ann { color: #f1fa8c; }
+  .str { color: #50fa7b; }
+  .cmt { color: #6272a4; font-style: italic; }
+  .typ { color: #ffb86c; }
+  .met { color: #50fa7b; }
+  .num { color: #bd93f9; }
+  .intf { color: #8be9fd; }
+
+  /* RELATIONSHIP DIAGRAM */
+  .diagram-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    overflow-x: auto;
+    margin: 24px 0;
+  }
+
+  .arch-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .arch-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    text-align: center;
+    min-width: 110px;
+  }
+
+  .arch-box.highlight { border-color: var(--accent); color: var(--accent); }
+  .arch-box.green { border-color: var(--accent3); color: var(--accent3); }
+  .arch-box.purple { border-color: var(--accent2); color: var(--accent2); }
+  .arch-box.yellow { border-color: var(--accent4); color: var(--accent4); }
+  .arch-box.red { border-color: var(--accent5); color: var(--accent5); }
+  .arch-box.db { border-color: #94a3b8; color: #94a3b8; background: rgba(148,163,184,0.08); }
+
+  .arch-arrow {
+    font-size: 1.2rem;
+    color: var(--muted);
+    font-family: monospace;
+  }
+
+  .arch-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 6px;
+  }
+
+  /* CRUD TABLE */
+  .crud-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .crud-card {
+    border-radius: 12px;
+    padding: 24px 20px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .crud-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background: var(--c);
+  }
+
+  .crud-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--c);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--c);
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+
+  .crud-method {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--c);
+    margin-bottom: 4px;
+  }
+
+  .crud-card h3 { font-size: 1rem; margin-bottom: 8px; }
+  .crud-card p { font-size: 0.8rem; color: var(--muted); }
+
+  /* LAYER BLOCK */
+  .layer-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 24px 0;
+  }
+
+  .layer {
+    display: flex;
+    align-items: stretch;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .layer-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 12px 8px;
+    width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: 700;
+  }
+
+  .layer-body {
+    padding: 14px 20px;
+    flex: 1;
+    background: var(--card);
+  }
+
+  .layer-body strong {
+    font-size: 0.85rem;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .layer-body span {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* PILL TAGS */
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* INLINE CODE */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82em;
+    background: rgba(79,158,255,0.1);
+    color: var(--accent);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ENUM DISPLAY */
+  .enum-grid {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .enum-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid;
+  }
+
+  /* INHERITANCE VISUAL */
+  .inherit-tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin: 24px auto;
+    max-width: 500px;
+  }
+
+  .inherit-node {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 28px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    min-width: 180px;
+  }
+
+  .inherit-node.parent { border-color: var(--accent2); color: var(--accent2); }
+  .inherit-node.child { border-color: var(--accent3); color: var(--accent3); }
+
+  .inherit-conn {
+    width: 2px;
+    height: 32px;
+    background: linear-gradient(var(--accent2), var(--accent3));
+    position: relative;
+  }
+
+  .inherit-conn::after {
+    content: '▼';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--accent3);
+    font-size: 10px;
+  }
+
+  /* SECTION ACCENT LINES */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .section-divider-line {
+    height: 1px;
+    flex: 1;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  /* SUMMARY TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-top: 20px;
+  }
+
+  th {
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text);
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .hero { padding: 48px 20px 40px; }
+    .container { padding: 0 16px; }
+    section { padding: 40px 0; }
+    .nav-strip { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">// Driving School · Instructor Module</div>
+  <h1>OOP, Relationships<br>& CRUD — Explained</h1>
+  <p>A deep-dive into every Java class in your instructor package — with visual diagrams, annotated code, and plain-English explanations.</p>
+</div>
+
+<!-- NAV -->
+<div class="nav-strip">
+  <a href="#architecture">Architecture</a>
+  <a href="#oop">OOP Concepts</a>
+  <a href="#inheritance">Inheritance</a>
+  <a href="#encapsulation">Encapsulation</a>
+  <a href="#abstraction">Abstraction</a>
+  <a href="#polymorphism">Polymorphism</a>
+  <a href="#relationships">Relationships</a>
+  <a href="#enum">Enum</a>
+  <a href="#crud">CRUD</a>
+  <a href="#dto">DTO Pattern</a>
+  <a href="#summary">Summary</a>
+</div>
+
+<!-- SECTION 1: ARCHITECTURE -->
+<section id="architecture">
+<div class="container">
+  <div class="section-label">01 — Overview</div>
+  <h2>Layered Architecture</h2>
+  <p class="intro-text">Your instructor module is a classic <strong>Spring Boot REST API</strong> following a 5-layer architecture. Each layer has one responsibility — and each maps to a specific Java class in your project.</p>
+
+  <div class="layer-stack">
+    <div class="layer">
+      <div class="layer-tag" style="background:#4f9eff">CLIENT</div>
+      <div class="layer-body">
+        <strong>HTTP Client (Browser / Postman / Frontend)</strong>
+        <span>Sends GET, POST, PUT, DELETE requests to /api/instructors</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-tag" style="background:#a78bfa">CTRL</div>
+      <div class="layer-body">
+        <strong>InstructorController.java — @RestController</strong>
+        <span>Receives HTTP requests, delegates to service, returns HTTP responses</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-tag" style="background:#34d399">SVC</div>
+      <div class="layer-body">
+        <strong>InstructorService.java — @Service</strong>
+        <span>Holds all business logic: ID generation, null-safe updates, DTO ↔ Entity conversion</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-tag" style="background:#f59e0b">REPO</div>
+      <div class="layer-body">
+        <strong>InstructorRepository.java — @Repository (JpaRepository)</strong>
+        <span>Speaks to the database; Spring auto-generates all SQL for you</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-tag" style="background:#fb7185">DATA</div>
+      <div class="layer-body">
+        <strong>Instructor.java (Entity) + InstructorDTO.java</strong>
+        <span>Entity = database table row. DTO = the shape of data sent over the network</span>
+      </div>
+    </div>
+    <div class="layer">
+      <div class="layer-tag" style="background:#64748b">DB</div>
+      <div class="layer-body">
+        <strong>MySQL / PostgreSQL — instructor table</strong>
+        <span>Persistent storage managed by JPA / Hibernate</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arch-label" style="margin-top:8px">↑ Data flows up from DB to Client &nbsp;|&nbsp; Requests flow down from Client to DB ↑</div>
+</div>
+</section>
+
+<!-- SECTION 2: OOP CONCEPTS -->
+<section id="oop">
+<div class="container">
+  <div class="section-label">02 — Core Principles</div>
+  <h2>4 OOP Pillars in Your Code</h2>
+  <p class="intro-text">Object-Oriented Programming is built on four pillars. All four appear directly in your instructor module.</p>
+
+  <div class="cards cols-2">
+    <div class="card" style="--card-accent: var(--accent2)">
+      <div class="card-icon">🧬</div>
+      <h3>Inheritance</h3>
+      <p><code>Instructor extends Person</code> — Instructor reuses all fields from Person (id, name, email, phone, username, password, role) without rewriting them. "IS-A" relationship.</p>
+      <div class="tags">
+        <span class="tag">extends</span>
+        <span class="tag">@EqualsAndHashCode(callSuper=true)</span>
+        <span class="tag">IS-A</span>
+      </div>
+    </div>
+    <div class="card" style="--card-accent: var(--accent3)">
+      <div class="card-icon">🔒</div>
+      <h3>Encapsulation</h3>
+      <p>All fields in <code>Instructor</code>, <code>InstructorDTO</code>, and <code>Person</code> are <strong>private</strong>. Lombok's <code>@Data</code> generates public getters/setters — so internal details stay hidden.</p>
+      <div class="tags">
+        <span class="tag">private fields</span>
+        <span class="tag">@Data</span>
+        <span class="tag">getters/setters</span>
+      </div>
+    </div>
+    <div class="card" style="--card-accent: var(--accent)">
+      <div class="card-icon">🎭</div>
+      <h3>Abstraction</h3>
+      <p><code>InstructorRepository</code> is an <em>interface</em> — you never write any SQL. The interface abstracts away all database complexity. Same with the service hiding DB logic from the controller.</p>
+      <div class="tags">
+        <span class="tag">interface</span>
+        <span class="tag">JpaRepository</span>
+        <span class="tag">@Service</span>
+      </div>
+    </div>
+    <div class="card" style="--card-accent: var(--accent4)">
+      <div class="card-icon">🔄</div>
+      <h3>Polymorphism</h3>
+      <p><code>convertToDTO()</code> and <code>convertToEntity()</code> are private methods that can evolve independently. Spring's <code>@Autowired</code> injects the right implementation at runtime — classic runtime polymorphism.</p>
+      <div class="tags">
+        <span class="tag">method overloading</span>
+        <span class="tag">@Autowired</span>
+        <span class="tag">runtime injection</span>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 3: INHERITANCE -->
+<section id="inheritance">
+<div class="container">
+  <div class="section-label">03 — OOP: Inheritance</div>
+  <h2>Instructor extends Person</h2>
+  <p class="intro-text">The most visible OOP concept in your code. <code>Instructor</code> inherits from a <code>Person</code> base class, which (based on the import) likely lives in <code>com.drivingschool.common.entity</code>.</p>
+
+  <div class="inherit-tree">
+    <div class="inherit-node parent">
+      🧑 Person (base class)<br>
+      <span style="font-size:0.7rem;color:var(--muted)">id · fullName · email · phone<br>username · password · role</span>
+    </div>
+    <div class="inherit-conn"></div>
+    <div class="inherit-node child">
+      🏫 Instructor (child class)<br>
+      <span style="font-size:0.7rem;color:var(--muted)">nic · licenseNumber · specialization<br>yearsOfExperience · status · joinedDate</span>
+    </div>
+  </div>
+
+  <div class="cards cols-2">
+    <div>
+      <pre><span class="cmt">// Child class — Instructor.java</span>
+<span class="ann">@Data</span>
+<span class="ann">@EqualsAndHashCode(callSuper = true)</span>
+<span class="ann">@NoArgsConstructor</span>
+<span class="ann">@AllArgsConstructor</span>
+<span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="cls">Instructor</span> <span class="kw">extends</span> <span class="cls">Person</span> {
+
+  <span class="cmt">// Only EXTRA fields go here!</span>
+  <span class="kw">private</span> <span class="typ">String</span> nic;
+  <span class="kw">private</span> <span class="typ">String</span> licenseNumber;
+
+  <span class="ann">@Enumerated(EnumType.STRING)</span>
+  <span class="kw">private</span> <span class="cls">Specialization</span> specialization;
+
+  <span class="kw">private int</span> yearsOfExperience;
+  <span class="kw">private</span> <span class="typ">String</span> status;
+  <span class="kw">private</span> <span class="typ">String</span> joinedDate;
+}</pre>
+    </div>
+    <div class="card" style="--card-accent: var(--accent2); margin-top:0">
+      <h3>What Instructor INHERITS from Person</h3>
+      <p>Even though they don't appear in <code>Instructor.java</code>, these fields exist on every Instructor object at runtime:</p>
+      <div class="tags" style="flex-direction:column;gap:6px;margin-top:8px">
+        <span class="tag">🔑 id (primary key)</span>
+        <span class="tag">👤 fullName</span>
+        <span class="tag">📧 email</span>
+        <span class="tag">📱 phone</span>
+        <span class="tag">🔐 username + password</span>
+        <span class="tag">🎭 role</span>
+      </div>
+      <p style="margin-top:12px">This is <strong>DRY</strong> (Don't Repeat Yourself). Other entities like <code>Student</code> or <code>Admin</code> can also extend <code>Person</code> and get the same fields.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;--card-accent:var(--accent4)">
+    <h3>⚠️ Why <code>@EqualsAndHashCode(callSuper = true)</code>?</h3>
+    <p>Lombok's <code>@Data</code> generates <code>equals()</code> and <code>hashCode()</code> based only on fields declared in the current class. <code>callSuper = true</code> tells Lombok: also include the <em>parent class fields</em> (like <code>id</code>) when comparing two Instructors. Without it, two instructors with the same <code>nic</code> but different IDs would be considered equal!</p>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 4: ENCAPSULATION -->
+<section id="encapsulation">
+<div class="container">
+  <div class="section-label">04 — OOP: Encapsulation</div>
+  <h2>Data Hidden Behind Getters & Setters</h2>
+  <p class="intro-text">All fields are <code>private</code>. The outside world can only interact through controlled getter/setter methods. Lombok's <code>@Data</code> generates these automatically.</p>
+
+  <div class="cards cols-2">
+    <div>
+      <pre><span class="cmt">// What you WRITE (InstructorDTO.java)</span>
+<span class="ann">@Data</span>  <span class="cmt">// Lombok magic!</span>
+<span class="kw">public class</span> <span class="cls">InstructorDTO</span> {
+    <span class="kw">private</span> <span class="typ">String</span> id;
+    <span class="kw">private</span> <span class="typ">String</span> fullName;
+    <span class="kw">private</span> <span class="typ">String</span> email;
+    <span class="kw">private</span> <span class="typ">String</span> phone;
+    <span class="kw">private</span> <span class="typ">String</span> nic;
+    <span class="cmt">// ... more fields</span>
+}</pre>
+
+      <pre><span class="cmt">// What Lombok GENERATES for you</span>
+<span class="kw">public</span> <span class="typ">String</span> <span class="met">getFullName</span>() {
+    <span class="kw">return</span> <span class="kw">this</span>.fullName;
+}
+<span class="kw">public void</span> <span class="met">setFullName</span>(<span class="typ">String</span> fullName) {
+    <span class="kw">this</span>.fullName = fullName;
+}
+<span class="cmt">// ... a getter/setter pair for EVERY field</span></pre>
+    </div>
+    <div class="card" style="--card-accent:var(--accent3)">
+      <h3>Why Encapsulation Matters</h3>
+      <p style="margin-bottom:10px">In <code>updateInstructor()</code> in the service, you can see encapsulation protecting data integrity:</p>
+      <pre style="margin:0;font-size:0.75rem"><span class="cmt">// Null-safe update — ONLY changes</span>
+<span class="cmt">// what the caller provided</span>
+<span class="kw">if</span> (dto.<span class="met">getFullName</span>() != <span class="kw">null</span>)
+    existing.<span class="met">setFullName</span>(dto.<span class="met">getFullName</span>());
+<span class="kw">if</span> (dto.<span class="met">getEmail</span>() != <span class="kw">null</span>)
+    existing.<span class="met">setEmail</span>(dto.<span class="met">getEmail</span>());</pre>
+      <p style="margin-top:10px">Because fields are private, the service is the <em>gatekeeper</em> — it decides what can be changed and under what rules.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 5: ABSTRACTION -->
+<section id="abstraction">
+<div class="container">
+  <div class="section-label">05 — OOP: Abstraction</div>
+  <h2>Hiding Complexity Behind Interfaces</h2>
+  <p class="intro-text">Abstraction means: show only what's necessary, hide the implementation. Two places in your code use this powerfully.</p>
+
+  <div class="cards cols-2">
+    <div class="card" style="--card-accent:var(--accent)">
+      <h3>1. JpaRepository Interface</h3>
+      <p>You declare the <em>interface</em> with what you <strong>want to do</strong>. Spring Data JPA writes the actual SQL and Java code behind the scenes.</p>
+      <pre style="margin-top:10px;font-size:0.75rem"><span class="ann">@Repository</span>
+<span class="kw">public interface</span> <span class="intf">InstructorRepository</span>
+    <span class="kw">extends</span> <span class="cls">JpaRepository</span>&lt;<span class="cls">Instructor</span>, <span class="typ">String</span>&gt; {
+
+  <span class="cmt">// Spring generates: SELECT * FROM instructor</span>
+  <span class="cmt">//                  WHERE email = ?</span>
+  <span class="cls">Instructor</span> <span class="met">findByEmail</span>(<span class="typ">String</span> email);
+
+  <span class="cmt">// And you get these for FREE:</span>
+  <span class="cmt">// findAll(), findById(), save(), deleteById()</span>
+}</pre>
+    </div>
+    <div class="card" style="--card-accent:var(--accent3)">
+      <h3>2. Service as Abstraction Layer</h3>
+      <p>The controller never touches the database. It only calls the service's clean, named methods. All complexity lives inside the service.</p>
+      <pre style="margin-top:10px;font-size:0.75rem"><span class="cmt">// Controller sees this clean API:</span>
+instructorService.<span class="met">getAllInstructors</span>();
+instructorService.<span class="met">getInstructorById</span>(id);
+instructorService.<span class="met">createInstructor</span>(dto);
+instructorService.<span class="met">updateInstructor</span>(id, dto);
+instructorService.<span class="met">deleteInstructor</span>(id);
+
+<span class="cmt">// Controller doesn't know about:</span>
+<span class="cmt">// — ID generation logic (I0001, I0002...)</span>
+<span class="cmt">// — password encoding</span>
+<span class="cmt">// — DTO ↔ Entity conversion</span></pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 6: POLYMORPHISM -->
+<section id="polymorphism">
+<div class="container">
+  <div class="section-label">06 — OOP: Polymorphism</div>
+  <h2>Same Name, Different Behaviour</h2>
+  <p class="intro-text">Polymorphism = "many forms". It shows up in two ways in your code.</p>
+
+  <div class="cards cols-2">
+    <div class="card" style="--card-accent:var(--accent4)">
+      <h3>Runtime Polymorphism — Spring DI</h3>
+      <p>When Spring sees <code>@Autowired</code>, it looks up the correct implementation at runtime and injects it. The controller doesn't need to know <em>which</em> InstructorService implementation it's using.</p>
+      <pre style="font-size:0.75rem"><span class="ann">@RestController</span>
+<span class="kw">public class</span> <span class="cls">InstructorController</span> {
+
+  <span class="ann">@Autowired</span>  <span class="cmt">// Spring injects the right impl</span>
+  <span class="kw">private</span> <span class="cls">InstructorService</span> instructorService;
+  <span class="cmt">// Could swap in a mock in tests!</span>
+}</pre>
+    </div>
+    <div class="card" style="--card-accent:var(--accent2)">
+      <h3>Method Overloading — Enum</h3>
+      <p>The <code>Specialization</code> enum has a <code>getLabel()</code> method that returns a different string for each constant — same method, different output. Classic polymorphic behaviour.</p>
+      <pre style="font-size:0.75rem">Specialization.MOTORCYCLE.<span class="met">getLabel</span>()
+<span class="cmt">// → "Motorcycle"</span>
+
+Specialization.HEAVY_VEHICLE.<span class="met">getLabel</span>()
+<span class="cmt">// → "Heavy Vehicle"</span>
+
+<span class="cmt">// Same method — 4 different results</span></pre>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;--card-accent:var(--accent3)">
+    <h3>Conversion Methods (Overloading Pattern)</h3>
+    <p>The service has two private helpers — <code>convertToDTO(Instructor)</code> and <code>convertToEntity(InstructorDTO)</code>. They're complementary transformations: same concept, opposite direction. Used inside <code>map(this::convertToDTO)</code>, this is a method reference used polymorphically in a stream.</p>
+    <pre style="font-size:0.78rem">instructorRepository.findAll()
+    .<span class="met">stream</span>()
+    .<span class="met">map</span>(<span class="kw">this</span>::<span class="met">convertToDTO</span>)  <span class="cmt">// method reference = polymorphic!</span>
+    .<span class="met">collect</span>(Collectors.<span class="met">toList</span>());</pre>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 7: RELATIONSHIPS -->
+<section id="relationships">
+<div class="container">
+  <div class="section-label">07 — Class Relationships</div>
+  <h2>How Classes Connect to Each Other</h2>
+  <p class="intro-text">OOP relationships define how classes depend on, use, and know about each other. Your code has 5 distinct relationship types.</p>
+
+  <div class="cards cols-2" style="margin-bottom:24px">
+
+    <div class="card" style="--card-accent:var(--accent2)">
+      <div class="card-icon" style="font-size:24px">🧬</div>
+      <h3>Inheritance (IS-A)</h3>
+      <p><code>Instructor extends Person</code><br>Strongest relationship. Child inherits all fields and methods of the parent. The child IS a Person.</p>
+      <pre style="font-size:0.75rem"><span class="kw">public class</span> <span class="cls">Instructor</span>
+    <span class="kw">extends</span> <span class="cls">Person</span> { ... }</pre>
+      <div class="tags"><span class="tag">extends</span><span class="tag">strongest coupling</span></div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent3)">
+      <div class="card-icon" style="font-size:24px">🔌</div>
+      <h3>Realization (implements)</h3>
+      <p><code>InstructorRepository implements JpaRepository</code><br>A class fulfils an interface's contract. Spring Data provides the implementation automatically.</p>
+      <pre style="font-size:0.75rem"><span class="kw">public interface</span> <span class="intf">InstructorRepository</span>
+    <span class="kw">extends</span> <span class="intf">JpaRepository</span>&lt;...&gt; { ... }</pre>
+      <div class="tags"><span class="tag">interface</span><span class="tag">implements</span></div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent)">
+      <div class="card-icon" style="font-size:24px">🤝</div>
+      <h3>Dependency (uses)</h3>
+      <p><code>InstructorController</code> uses <code>InstructorService</code>.<br><code>InstructorService</code> uses <code>InstructorRepository</code>.<br>Weakest – they know each other only by reference.</p>
+      <pre style="font-size:0.75rem"><span class="ann">@Autowired</span>
+<span class="kw">private</span> <span class="cls">InstructorService</span> service;</pre>
+      <div class="tags"><span class="tag">@Autowired</span><span class="tag">loose coupling</span></div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent4)">
+      <div class="card-icon" style="font-size:24px">📦</div>
+      <h3>Association (has-a field)</h3>
+      <p><code>Instructor</code> has a <code>Specialization</code> field.<br><code>InstructorDTO</code> also has a <code>Specialization</code> field.<br>HAS-A: the object contains another object.</p>
+      <pre style="font-size:0.75rem"><span class="ann">@Enumerated(EnumType.STRING)</span>
+<span class="kw">private</span> <span class="cls">Specialization</span> specialization;</pre>
+      <div class="tags"><span class="tag">has-a</span><span class="tag">field reference</span></div>
+    </div>
+
+    <div class="card" style="--card-accent:var(--accent5)">
+      <div class="card-icon" style="font-size:24px">🏗️</div>
+      <h3>Aggregation (whole–part)</h3>
+      <p><code>InstructorService</code> holds an <code>InstructorRepository</code> — the repo is a component of the service. If the service is destroyed, the repository still exists independently.</p>
+      <pre style="font-size:0.75rem"><span class="ann">@Autowired</span>
+<span class="kw">private</span> <span class="cls">InstructorRepository</span>
+    instructorRepository;</pre>
+      <div class="tags"><span class="tag">whole-part</span><span class="tag">independent lifecycle</span></div>
+    </div>
+
+    <div class="card" style="--card-accent:#94a3b8">
+      <div class="card-icon" style="font-size:24px">🗺️</div>
+      <h3>Full Dependency Map</h3>
+      <div class="arch-row" style="flex-direction:column;gap:6px;margin-top:12px">
+        <div class="arch-box highlight">Controller</div>
+        <div class="arch-arrow">↓ @Autowired (Dependency)</div>
+        <div class="arch-box green">Service</div>
+        <div class="arch-arrow">↓ @Autowired (Aggregation)</div>
+        <div class="arch-box yellow">Repository (interface)</div>
+        <div class="arch-arrow">↓ JPA (Realization)</div>
+        <div class="arch-box db">MySQL Database</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</section>
+
+<!-- SECTION 8: ENUM -->
+<section id="enum">
+<div class="container">
+  <div class="section-label">08 — Special Types</div>
+  <h2>Enum: Specialization</h2>
+  <p class="intro-text">An <code>enum</code> is a special class where all instances are predefined constants. It's perfect for a fixed set of options like vehicle specializations.</p>
+
+  <div class="cards cols-2">
+    <div>
+      <pre><span class="ann">@Getter</span>  <span class="cmt">// Lombok generates getLabel()</span>
+<span class="kw">public enum</span> <span class="cls">Specialization</span> {
+
+  <span class="num">MOTORCYCLE</span>(<span class="str">"Motorcycle"</span>),
+  <span class="num">LIGHT_VEHICLE</span>(<span class="str">"Light Vehicle"</span>),
+  <span class="num">HEAVY_VEHICLE</span>(<span class="str">"Heavy Vehicle"</span>),
+  <span class="num">BUS</span>(<span class="str">"Bus"</span>);
+
+  <span class="kw">private final</span> <span class="typ">String</span> label;
+
+  <span class="cmt">// Constructor — sets the label</span>
+  <span class="cls">Specialization</span>(<span class="typ">String</span> label) {
+    <span class="kw">this</span>.label = label;
+  }
+}</pre>
+    </div>
+    <div>
+      <div class="card" style="--card-accent:var(--accent4);margin-top:0">
+        <h3>Enum Constants</h3>
+        <div class="enum-grid">
+          <span class="enum-pill" style="border-color:#4f9eff;color:#4f9eff">🏍 MOTORCYCLE</span>
+          <span class="enum-pill" style="border-color:#34d399;color:#34d399">🚗 LIGHT_VEHICLE</span>
+          <span class="enum-pill" style="border-color:#f59e0b;color:#f59e0b">🚛 HEAVY_VEHICLE</span>
+          <span class="enum-pill" style="border-color:#fb7185;color:#fb7185">🚌 BUS</span>
+        </div>
+        <p style="margin-top:14px">Stored in the database as a <code>STRING</code> (e.g. "MOTORCYCLE") because of <code>@Enumerated(EnumType.STRING)</code>. Human-readable and safe even if you reorder the constants later.</p>
+      </div>
+      <div class="card" style="--card-accent:var(--accent3);margin-top:16px">
+        <h3>Why Use Enum Instead of String?</h3>
+        <p>If <code>specialization</code> was a plain <code>String</code>, someone could set it to <code>"Bicycle"</code> or leave a typo like <code>"motrCycle"</code>. An enum prevents invalid values at <em>compile time</em>, not just at runtime.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 9: CRUD -->
+<section id="crud">
+<div class="container">
+  <div class="section-label">09 — CRUD Operations</div>
+  <h2>Create · Read · Update · Delete</h2>
+  <p class="intro-text">CRUD is the complete set of database operations. Your module implements all four, each flowing through all 3 layers: Controller → Service → Repository.</p>
+
+  <div class="crud-grid">
+    <div class="crud-card" style="--c:#34d399">
+      <span class="crud-badge">CREATE</span>
+      <div class="crud-method">POST /api/instructors</div>
+      <h3>Add New Instructor</h3>
+      <p>Auto-generates the next ID (I0001, I0002…), sets default status to AVAILABLE, sets joinedDate to today, encodes the password.</p>
+    </div>
+    <div class="crud-card" style="--c:#4f9eff">
+      <span class="crud-badge">READ</span>
+      <div class="crud-method">GET /api/instructors</div>
+      <div class="crud-method">GET /api/instructors/{id}</div>
+      <h3>Fetch Instructor(s)</h3>
+      <p>Returns all instructors as a list, or a single instructor by ID. Returns 404 if not found.</p>
+    </div>
+    <div class="crud-card" style="--c:#f59e0b">
+      <span class="crud-badge">UPDATE</span>
+      <div class="crud-method">PUT /api/instructors/{id}</div>
+      <h3>Edit Instructor</h3>
+      <p>Null-safe partial update — only changes fields that are provided. Existing values stay if the new value is null.</p>
+    </div>
+    <div class="crud-card" style="--c:#fb7185">
+      <span class="crud-badge">DELETE</span>
+      <div class="crud-method">DELETE /api/instructors/{id}</div>
+      <h3>Remove Instructor</h3>
+      <p>Deletes by ID from the database. Returns HTTP 200 OK on success.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:32px">
+    <h3 style="margin-bottom:16px;font-size:1.1rem">Full CRUD Flow — Create Example</h3>
+    <pre><span class="cmt">// 1. HTTP Request arrives at Controller</span>
+<span class="ann">@PostMapping</span>
+<span class="kw">public</span> <span class="cls">InstructorDTO</span> <span class="met">createInstructor</span>(
+    <span class="ann">@RequestBody</span> <span class="cls">InstructorDTO</span> dto) {
+
+  <span class="kw">return</span> instructorService.<span class="met">createInstructor</span>(dto);
+}
+
+<span class="cmt">// 2. Service handles business logic</span>
+<span class="kw">public</span> <span class="cls">InstructorDTO</span> <span class="met">createInstructor</span>(<span class="cls">InstructorDTO</span> dto) {
+  <span class="cmt">// Auto-generate ID: I0001 → I0002 → ...</span>
+  <span class="cls">Instructor</span> lastIns = repo.<span class="met">findLastManualId</span>();
+  <span class="typ">String</span> nextId = <span class="str">"I0001"</span>;
+  <span class="kw">if</span> (lastIns != <span class="kw">null</span>) {
+    <span class="kw">int</span> last = Integer.<span class="met">parseInt</span>(lastIns.<span class="met">getId</span>().<span class="met">substring</span>(<span class="num">1</span>));
+    nextId = String.<span class="met">format</span>(<span class="str">"I%04d"</span>, last + <span class="num">1</span>);
+  }
+  <span class="cls">Instructor</span> entity = <span class="met">convertToEntity</span>(dto);
+  entity.<span class="met">setId</span>(nextId);
+  entity.<span class="met">setStatus</span>(<span class="str">"AVAILABLE"</span>);            <span class="cmt">// default</span>
+  entity.<span class="met">setJoinedDate</span>(LocalDate.<span class="met">now</span>().<span class="met">toString</span>()); <span class="cmt">// today</span>
+  <span class="kw">return</span> <span class="met">convertToDTO</span>(repo.<span class="met">save</span>(entity)); <span class="cmt">// 3. → DB</span>
+}</pre>
+  </div>
+
+  <div style="margin-top:24px">
+    <h3 style="margin-bottom:16px;font-size:1.1rem">Smart ID Generation</h3>
+    <pre><span class="cmt">// Custom query in InstructorRepository:</span>
+<span class="ann">@Query</span>(value = <span class="str">"SELECT * FROM instructor WHERE id LIKE 'I%'
+         ORDER BY CAST(SUBSTRING(id, 2) AS UNSIGNED) DESC
+         LIMIT 1"</span>, nativeQuery = <span class="kw">true</span>)
+<span class="cls">Instructor</span> <span class="met">findLastManualId</span>();
+
+<span class="cmt">// This finds the highest existing ID:
+// I0001, I0003, I0007 → returns I0007
+// Service then generates I0008</span></pre>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 10: DTO PATTERN -->
+<section id="dto">
+<div class="container">
+  <div class="section-label">10 — Design Pattern</div>
+  <h2>DTO Pattern — Data Transfer Object</h2>
+  <p class="intro-text">A DTO is a separate object used to transfer data over the network. It's different from your database Entity, and this separation is intentional and important.</p>
+
+  <div class="cards cols-2">
+    <div class="card" style="--card-accent:var(--accent5)">
+      <h3>Entity vs DTO — What's Different?</h3>
+      <table style="margin-top:12px">
+        <thead>
+          <tr><th>Feature</th><th>Entity</th><th>DTO</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Purpose</td><td>Maps to DB table</td><td>Network transfer</td></tr>
+          <tr><td>Annotation</td><td><code>@Entity</code></td><td><code>@Data</code></td></tr>
+          <tr><td>Password</td><td>Hashed string</td><td>Plain text input</td></tr>
+          <tr><td>Role</td><td>Stored in DB</td><td>Set by client</td></tr>
+          <tr><td>Sensitive?</td><td>Yes — never expose</td><td>Controlled shape</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="--card-accent:var(--accent3)">
+      <h3>Why Not Just Return the Entity Directly?</h3>
+      <p style="margin-bottom:10px">If you returned <code>Instructor</code> (the entity) from the API, you would expose:</p>
+      <div class="tags" style="flex-direction:column;gap:6px">
+        <span class="tag">❌ Hashed password in JSON response</span>
+        <span class="tag">❌ Internal Hibernate proxy metadata</span>
+        <span class="tag">❌ Lazy-loading fields that could break serialization</span>
+        <span class="tag">❌ DB schema structure leaked to client</span>
+      </div>
+      <p style="margin-top:12px">The DTO is a <strong>clean, safe, controlled</strong> view of the data. The service's <code>convertToDTO()</code> decides exactly what the client sees.</p>
+    </div>
+  </div>
+
+  <pre style="margin-top:24px"><span class="cmt">// convertToDTO() — the "security filter"</span>
+<span class="kw">private</span> <span class="cls">InstructorDTO</span> <span class="met">convertToDTO</span>(<span class="cls">Instructor</span> instructor) {
+    <span class="cls">InstructorDTO</span> dto = <span class="kw">new</span> <span class="cls">InstructorDTO</span>();
+    dto.<span class="met">setId</span>(instructor.<span class="met">getId</span>());
+    dto.<span class="met">setFullName</span>(instructor.<span class="met">getFullName</span>());
+    dto.<span class="met">setEmail</span>(instructor.<span class="met">getEmail</span>());
+    <span class="cmt">// ⚠️ Notice: password is NOT copied to DTO!</span>
+    <span class="cmt">// The hashed password stays on the server side</span>
+    dto.<span class="met">setUsername</span>(instructor.<span class="met">getUsername</span>());
+    dto.<span class="met">setRole</span>(instructor.<span class="met">getRole</span>());
+    <span class="kw">return</span> dto;
+}</pre>
+</div>
+</section>
+
+<!-- SECTION 11: EXCEPTION -->
+<section>
+<div class="container">
+  <div class="section-label">11 — Error Handling</div>
+  <h2>Custom Exception Class</h2>
+  <p class="intro-text"><code>InstructorException</code> is a custom <code>RuntimeException</code> — this is OOP at its simplest: extending a built-in Java class to give domain-specific meaning to errors.</p>
+
+  <div class="cards cols-2">
+    <div>
+      <pre><span class="kw">public class</span> <span class="cls">InstructorException</span>
+    <span class="kw">extends</span> <span class="cls">RuntimeException</span> {
+
+  <span class="kw">public</span> <span class="cls">InstructorException</span>(<span class="typ">String</span> message) {
+    <span class="kw">super</span>(message); <span class="cmt">// passes to RuntimeException</span>
+  }
+}</pre>
+    </div>
+    <div class="card" style="--card-accent:var(--accent5)">
+      <h3>OOP Concepts Used</h3>
+      <p>This tiny class demonstrates <strong>Inheritance</strong> (extends RuntimeException), <strong>Constructor chaining</strong> (super(message)), and could be used for <strong>Polymorphism</strong> — any catch block that catches <code>RuntimeException</code> will also catch <code>InstructorException</code>.</p>
+      <pre style="font-size:0.75rem;margin-top:10px"><span class="cmt">// Usage in service:</span>
+<span class="kw">throw new</span> <span class="cls">InstructorException</span>(
+    <span class="str">"Instructor not found: "</span> + id
+);</pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 12: SUMMARY -->
+<section id="summary" style="border-bottom:none">
+<div class="container">
+  <div class="section-label">12 — Summary</div>
+  <h2>Everything at a Glance</h2>
+  <p class="intro-text">Quick reference: every class, its role, and which OOP/design concepts it demonstrates.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Layer</th>
+        <th>OOP Concepts</th>
+        <th>Key Annotation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>Instructor.java</code></td>
+        <td>Entity</td>
+        <td>Inheritance, Encapsulation, Association (Specialization)</td>
+        <td><code>@Entity</code></td>
+      </tr>
+      <tr>
+        <td><code>Specialization.java</code></td>
+        <td>Enum</td>
+        <td>Encapsulation, Polymorphism, Constructor</td>
+        <td><code>@Getter</code></td>
+      </tr>
+      <tr>
+        <td><code>InstructorDTO.java</code></td>
+        <td>DTO</td>
+        <td>Encapsulation, DTO Pattern, Association</td>
+        <td><code>@Data</code></td>
+      </tr>
+      <tr>
+        <td><code>InstructorRepository.java</code></td>
+        <td>Repository</td>
+        <td>Abstraction, Realization (implements), Custom Query</td>
+        <td><code>@Repository</code></td>
+      </tr>
+      <tr>
+        <td><code>InstructorService.java</code></td>
+        <td>Service</td>
+        <td>All 4 pillars, CRUD logic, Aggregation, Method reference</td>
+        <td><code>@Service</code></td>
+      </tr>
+      <tr>
+        <td><code>InstructorController.java</code></td>
+        <td>Controller</td>
+        <td>Dependency, Polymorphism (DI), REST mapping</td>
+        <td><code>@RestController</code></td>
+      </tr>
+      <tr>
+        <td><code>InstructorException.java</code></td>
+        <td>Exception</td>
+        <td>Inheritance, Constructor chaining</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="cards cols-4" style="margin-top:32px">
+    <div class="card" style="--card-accent:var(--accent2);text-align:center">
+      <div style="font-size:2rem;margin-bottom:8px">🧬</div>
+      <h3>Inheritance</h3>
+      <p style="font-size:0.8rem">Instructor → Person<br>Exception → RuntimeException<br>Repo → JpaRepository</p>
+    </div>
+    <div class="card" style="--card-accent:var(--accent3);text-align:center">
+      <div style="font-size:2rem;margin-bottom:8px">🔒</div>
+      <h3>Encapsulation</h3>
+      <p style="font-size:0.8rem">Private fields<br>Lombok @Data<br>Null-safe setters</p>
+    </div>
+    <div class="card" style="--card-accent:var(--accent);text-align:center">
+      <div style="font-size:2rem;margin-bottom:8px">🎭</div>
+      <h3>Abstraction</h3>
+      <p style="font-size:0.8rem">JpaRepository interface<br>Service hides DB logic<br>Named methods</p>
+    </div>
+    <div class="card" style="--card-accent:var(--accent4);text-align:center">
+      <div style="font-size:2rem;margin-bottom:8px">🔄</div>
+      <h3>Polymorphism</h3>
+      <p style="font-size:0.8rem">@Autowired injection<br>Enum getLabel()<br>Stream method refs</p>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:48px;padding:32px;background:var(--card);border:1px solid var(--border);border-radius:16px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:12px">BUILT FROM</div>
+    <div style="font-size:1.2rem;font-weight:800;color:var(--accent);margin-bottom:8px">instructor.zip</div>
+    <div style="font-size:0.85rem;color:var(--muted)">7 Java files · Spring Boot · JPA · Lombok · MySQL</div>
+  </div>
+</div>
+</section>
+
+</body>
+</html>
